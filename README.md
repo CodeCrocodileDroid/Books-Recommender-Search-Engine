@@ -49,4 +49,3 @@ User profiling with age groups and location data
 
 Rating analysis and popularity calculations
 
-Quick Start 🚀
