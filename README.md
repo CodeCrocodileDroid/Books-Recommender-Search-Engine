@@ -8,6 +8,10 @@ https://img.shields.io/badge/Python-3.8+-green
 https://img.shields.io/badge/Flask-3.0+-lightgrey
 https://img.shields.io/badge/License-MIT-yellow
 
+Kaggle used dataset URL : https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset
+
+download the CSV files and put them in the same folder with the app.py script 
+
 Features ✨
 🎯 Intelligent Recommendations
 Personalized Recommendations: Tailored suggestions based on user age, location, and reading history
