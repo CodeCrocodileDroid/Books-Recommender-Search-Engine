@@ -1,0 +1,47 @@
+/* Additional custom styles */
+.intcomma::after {
+    content: ',';
+}
+
+.intcomma:last-child::after {
+    content: '';
+}
+
+/* Loading animation */
+.loading-spinner {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    border: 0.25em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border 0.75s linear infinite;
+}
+
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+}
+
+/* Book cover animations */
+.book-cover {
+    transition: all 0.3s ease;
+}
+
+.book-card:hover .book-cover {
+    transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stat-number {
+        font-size: 1.8rem;
+    }
+
+    .hero-section {
+        padding: 40px 0 !important;
+    }
+
+    .search-box {
+        border-radius: 15px !important;
+    }
+}

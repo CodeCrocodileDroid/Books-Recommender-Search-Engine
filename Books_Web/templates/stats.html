@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics - Book Recommender</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: #2c3e50 !important;
+        }
+
+        .stats-header {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            border: none;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-item {
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+
+        .category-item:hover {
+            background: #e9ecef;
+        }
+
+        .category-count {
+            background: #3498db;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        .cache-info {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-book-open me-2"></i>
+                <strong>Book Recommender</strong>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/recommend/popular">Popular</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/stats">Statistics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/search">Search</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="stats-header">
+        <div class="container">
+            <h1 class="mb-3">System Statistics</h1>
+            <p class="lead mb-0">Comprehensive overview of the book recommendation system</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Cache Info -->
+        <div class="cache-info">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5><i class="fas fa-database me-2"></i>Cache Status: {{ stats.cache_status }}</h5>
+                    <p class="mb-0">
+                        {% if stats.cache_status == 'Enabled' %}
+                        Data is cached for faster loading. Cache ID: {{ stats.cache_prefix }}
+                        {% else %}
+                        Caching is disabled. System will load data from CSV files.
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-warning" onclick="clearCache()">
+                        <i class="fas fa-sync-alt me-2"></i>Clear Cache
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-6">
+                <div class="stat-card text-center">
+                    <div class="stat-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-number">{{ stats.total_books|intcomma }}</div>
+                    <div class="stat-label">Total Books</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card text-center">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-edit"></i>
+                    </div>
+                    <div class="stat-number">{{ stats.total_authors|intcomma }}</div>
+                    <div class="stat-label">Authors</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card text-center">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">{{ stats.total_users|intcomma }}</div>
+                    <div class="stat-label">Users</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card text-center">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-number">{{ stats.total_ratings|intcomma }}</div>
+                    <div class="stat-label">Ratings</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Details -->
+        <div class="row">
+            <!-- Rating Distribution Chart -->
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <h4 class="mb-4">Rating Distribution</h4>
+                    <canvas id="ratingChart" height="250"></canvas>
+                </div>
+            </div>
+
+            <!-- Top Categories -->
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <h4 class="mb-4">Top Categories</h4>
+                    <div id="categoriesList">
+                        {% for category, count in stats.top_categories.items() %}
+                        <div class="category-item">
+                            <span>{{ category }}</span>
+                            <span class="category-count">{{ count|intcomma }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Authors -->
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <h4 class="mb-4">Top Authors</h4>
+                    <div id="authorsList">
+                        {% for author, count in stats.top_authors.items() %}
+                        <div class="category-item">
+                            <span>{{ author }}</span>
+                            <span class="category-count">{{ count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Info -->
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <h4 class="mb-4">System Information</h4>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="stat-number">{{ stats.explicit_ratings|intcomma }}</div>
+                                <div class="stat-label">Explicit Ratings</div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="stat-number">{{ stats.categories }}</div>
+                                <div class="stat-label">Categories</div>
+                            </div>
+                        </div>
+                        {% if stats.avg_rating %}
+                        <div class="col-6 mb-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="stat-number">{{ stats.avg_rating|round(2) }}</div>
+                                <div class="stat-label">Avg Rating</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if stats.min_year %}
+                        <div class="col-6 mb-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="stat-number">{{ stats.min_year }} - {{ stats.max_year }}</div>
+                                <div class="stat-label">Publication Years</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Refresh Button -->
+        <div class="text-center refresh-btn">
+            <button class="btn btn-primary" onclick="location.reload()">
+                <i class="fas fa-redo me-2"></i>Refresh Statistics
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2024 Book Recommender System</p>
+            <p class="mb-0">
+                <a href="/" class="text-light me-3">Home</a>
+                <a href="/recommend/popular" class="text-light me-3">Popular</a>
+                <a href="/search" class="text-light">Search</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Charts -->
+    <script>
+        // Initialize rating distribution chart
+        const ratingData = {{ stats.rating_distribution|tojson|default('{}') }};
+
+        if (Object.keys(ratingData).length > 0) {
+            const ctx = document.getElementById('ratingChart').getContext('2d');
+            const labels = Object.keys(ratingData).map(r => r + '★');
+            const data = Object.values(ratingData);
+
+            // Generate colors based on rating
+            const colors = labels.map((label, index) => {
+                const rating = index + 1;
+                if (rating >= 4) return '#2ecc71'; // Green for high ratings
+                if (rating >= 3) return '#f1c40f'; // Yellow for medium
+                return '#e74c3c'; // Red for low
+            });
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Ratings',
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: colors.map(c => c.replace('0.8', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            document.getElementById('ratingChart').parentElement.innerHTML =
+                '<p class="text-muted text-center py-5">No rating data available</p>';
+        }
+
+        // Format numbers with commas
+        document.querySelectorAll('.stat-number').forEach(function(el) {
+            const num = parseInt(el.textContent.replace(/,/g, ''));
+            if (!isNaN(num)) {
+                el.textContent = num.toLocaleString();
+            }
+        });
+
+        // Clear cache function
+        function clearCache() {
+            if (confirm('Are you sure you want to clear the cache? The system will need to rebuild it on next load.')) {
+                fetch('/clear_cache', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('Error clearing cache: ' + error);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

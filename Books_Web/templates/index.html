@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Recommender System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: var(--secondary-color) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-section {
+            background: linear-gradient(rgba(44, 62, 80, 0.9), rgba(44, 62, 80, 0.9)),
+                        url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 0;
+            margin-bottom: 50px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .search-box {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .search-input {
+            border: none;
+            padding: 20px 30px;
+            font-size: 1.1rem;
+        }
+
+        .search-input:focus {
+            box-shadow: none;
+        }
+
+        .search-btn {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 20px 40px;
+            border-radius: 0 50px 50px 0;
+            transition: all 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #2980b9;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            height: 100%;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: var(--card-shadow);
+            border: none;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .category-badge {
+            display: inline-block;
+            background: var(--light-bg);
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: var(--secondary-color);
+        }
+
+        .category-badge:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .book-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: none;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .book-cover {
+            height: 200px;
+            background: #ecf0f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: #7f8c8d;
+        }
+
+        .rating-stars {
+            color: #f1c40f;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .footer {
+            background: var(--secondary-color);
+            color: white;
+            padding: 40px 0;
+            margin-top: 50px;
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 60px 0;
+            }
+
+            .search-box {
+                border-radius: 15px;
+            }
+
+            .search-btn {
+                border-radius: 0 0 15px 15px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-book-open me-2"></i>
+                <strong>Book Recommender</strong>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/recommend/popular">Popular</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/stats">Statistics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/search">Search</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h1 class="display-4 mb-4">Discover Your Next Favorite Book</h1>
+                    <p class="lead mb-5">Intelligent book recommendations powered by machine learning and collaborative filtering</p>
+
+                    <!-- Search Form -->
+                    <form action="/search" method="POST" class="mb-5">
+                        <div class="search-box">
+                            <div class="input-group">
+                                <input type="text" class="form-control search-input" name="query"
+                                       placeholder="Search for books, authors, or categories..."
+                                       aria-label="Search books" required>
+                                <button class="btn search-btn" type="submit">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="row">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stat-number" id="stat-books">{{ stats.total_books|default(0)|intcomma }}</div>
+                                <div class="stat-label">Books</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stat-number" id="stat-authors">{{ stats.total_authors|default(0)|intcomma }}</div>
+                                <div class="stat-label">Authors</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stat-number" id="stat-ratings">{{ stats.total_ratings|default(0)|intcomma }}</div>
+                                <div class="stat-label">Ratings</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stats-card text-center">
+                                <div class="stat-number" id="stat-categories">{{ stats.categories|default(0) }}</div>
+                                <div class="stat-label">Categories</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="container mb-5">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <h3>Personalized</h3>
+                    <p>Get recommendations tailored to your reading preferences and history</p>
+                    <a href="/recommend/user/276747" class="btn btn-primary mt-3">Try Personalized</a>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Popular Books</h3>
+                    <p>Discover trending books based on community ratings and reviews</p>
+                    <a href="/recommend/popular" class="btn btn-primary mt-3">View Popular</a>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <h3>By Category</h3>
+                    <p>Explore books by genre and category preferences</p>
+                    <div class="mt-3">
+                        <a href="/recommend/category/Fantasy" class="category-badge">Fantasy</a>
+                        <a href="/recommend/category/Science%20Fiction" class="category-badge">Sci-Fi</a>
+                        <a href="/recommend/category/Mystery%2FCrime" class="category-badge">Mystery</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="container mb-5">
+        <h2 class="text-center mb-4">Browse by Category</h2>
+        <div class="row">
+            {% for category in categories %}
+            <div class="col-md-3 col-6 mb-3">
+                <a href="/recommend/category/{{ category|urlencode }}" class="category-badge d-block text-center">
+                    {{ category }}
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Popular Books Preview -->
+    <section class="container mb-5">
+        <h2 class="text-center mb-4">Popular This Week</h2>
+        <div class="row">
+            {% for book in popular_books %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="book-card">
+                    <div class="book-cover">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="p-3">
+                        <h5 class="mb-2">{{ book.title[:50] }}{% if book.title|length > 50 %}...{% endif %}</h5>
+                        <p class="text-muted mb-2">by {{ book.author }}</p>
+                        {% if book.avg_rating %}
+                        <div class="rating-stars mb-2">
+                            {% for i in range(5) %}
+                                {% if i < (book.avg_rating|round|int) %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <small class="ms-2">{{ "%.1f"|format(book.avg_rating) }} ({{ book.num_ratings }})</small>
+                        </div>
+                        {% endif %}
+                        <span class="badge bg-primary">{{ book.category }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center">
+            <a href="/recommend/popular" class="btn btn-outline-primary">View All Popular Books</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-book-open me-2"></i>Book Recommender</h5>
+                    <p class="mt-3">Intelligent book discovery platform using collaborative filtering and content-based recommendations.</p>
+                </div>
+                <div class="col-md-3">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-light">Home</a></li>
+                        <li><a href="/recommend/popular" class="text-light">Popular Books</a></li>
+                        <li><a href="/stats" class="text-light">Statistics</a></li>
+                        <li><a href="/search" class="text-light">Search</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Features</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/recommend/user/276747" class="text-light">Personalized Recommendations</a></li>
+                        <li><a href="/recommend/category/Fantasy" class="text-light">Category Browsing</a></li>
+                        <li><a href="/api/stats" class="text-light">API Access</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="bg-light my-4">
+            <div class="text-center">
+                <p>&copy; 2024 Book Recommender System. All rights reserved.</p>
+                <p class="small">
+                    <span class="badge bg-info me-2">Cache: {{ stats.cache_status }}</span>
+                    <span class="badge bg-secondary">Books: {{ stats.total_books|default(0)|intcomma }}</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+    <script>
+        // Format numbers with commas
+        document.querySelectorAll('.stat-number').forEach(function(el) {
+            const num = parseInt(el.textContent.replace(/,/g, ''));
+            if (!isNaN(num)) {
+                el.textContent = num.toLocaleString();
+            }
+        });
+    </script>
+</body>
+</html>
